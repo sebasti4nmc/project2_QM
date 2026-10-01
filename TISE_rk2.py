@@ -11,10 +11,10 @@ def v(x):
         return x
 
 def f(x, psi, u=1): 
-    return u
+                return u
 
 def g(x, psi, u=1):
-    return -2 * psi * (v(x) - E)
+    return 2 * psi * (v(x) - E)
 
 class TISE:
     def __init__(self, u_eq, psi_eq, dx, psi_0=0, u0=1, x0=0):
@@ -62,11 +62,26 @@ def plot_eq(eq, interval=10):
     plt.ylabel("psi")
     plt.legend()
     plt.show()
-
+    
 def main():
-    tise = TISE(f, g, dx=0.1)
+    tise = TISE(u_eq=g, psi_eq=f, dx=0.1)
 
     plot_eq(tise)
+
+    for i in range (1,11):
+        E = i
+        def g(x, psi, u=1):
+            return 2 * psi * (v(x) - E)
+        
+        tise = TISE(u_eq=g, psi_eq=f, dx=0.1)
+
+        out = tise.predict(interval=10)
+        psi_L = out[1][len(out - 1)]
+        print (psi_L)
+
+        
+        
+        
 
 if __name__ == "__main__":
     main()
