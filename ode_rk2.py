@@ -50,7 +50,7 @@ def plot_eq(ode, x0, y0, interval=10):
 
 def main():
     x0, y0 = 0, 1
-    ode = ODE(eq_1, y0=y0, dx=.1, x0=x0)
+    ode = ODE(eq_1, y0=y0, dx=.4, x0=x0)
 
     plot_eq(ode, x0, y0)
 
