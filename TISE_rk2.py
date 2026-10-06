@@ -15,7 +15,7 @@ def g(E, x, psi, u=1):
     return 2 * psi * (v(x) - E)
 
 class TISE:
-    def __init__(self, u_eq, psi_eq, dx, e, psi_0=0, u0=1, x0=0):
+    def __init__(self, dx, e, u_eq=g, psi_eq=f, psi_0=0, u0=1, x0=0):
         self.f = psi_eq
         self.g = u_eq
         self.x = x0
@@ -76,7 +76,7 @@ def plot_eq(eq, E, L=None, pad=1.5):
 def shoot(E, L=None):
     if L is None:
             L = E + 3
-    tise = TISE(u_eq=g, psi_eq=f, dx=0.0001, e=E)
+    tise = TISE(dx=0.0001, e=E)
 
     out = tise.predict(L)
     x = np.array([p[0] for p in out])
@@ -86,7 +86,7 @@ def shoot(E, L=None):
     
 def main():
     energy = 1.86
-    tise = TISE(u_eq=g, psi_eq=f, dx=0.0001, e=energy)
+    tise = TISE(dx=0.0001, e=energy)
 
     plot_eq(tise, E=energy)
     print(shoot(E=energy))
