@@ -45,19 +45,19 @@ class TISE:
 
         return(self.x, self.psi, self.u)
 
-    def predict(self, interval):
-        n = math.ceil(interval / self.dx)
+    def predict(self, L):
+        n = math.ceil(L / self.dx)
         frames = [(self.x, self.psi, self.u)]  # include initial condition
         for _ in range(n):
             frames.append(self.getNext())
 
         return frames
 
-def plot_eq(eq, E, interval=None, pad=1.5):
-    if interval is None:
-        interval = E + 5                  # a little past the turning point
+def plot_eq(eq, E, L=None, pad=1.5):
+    if L is None:
+        L = E + 5                  # a little past the turning point
 
-    out = eq.predict(interval)
+    out = eq.predict(L)
     x = np.array([p[0] for p in out])
     psi = np.array([p[1] for p in out])
 
@@ -72,7 +72,7 @@ def plot_eq(eq, E, interval=None, pad=1.5):
     plt.ylabel("psi")
     
 def main():
-    tise = TISE(u_eq=g, psi_eq=f, dx=0.01)
+    tise = TISE(u_eq=g, psi_eq=f, dx=0.00001)
 
     plot_eq(tise, E=ENERGY)
 
@@ -82,7 +82,7 @@ def main():
         
     #     tise = TISE(u_eq=g, psi_eq=f, dx=0.01, e=energy)
 
-    #     plot_eq(tise, interval=energy+5)
+    #     plot_eq(tise, L=energy+5)
     
     plt.show()
         
