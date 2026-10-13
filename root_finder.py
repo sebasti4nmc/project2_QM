@@ -2,6 +2,7 @@ import numpy as np
 from TISE_rk2 import TISE
 import matplotlib.pyplot as plt
 from scipy.optimize import brentq
+import os
 
 L = 30
 E_min, E_max, dE = 0.1, 10.0, 0.1
@@ -17,10 +18,36 @@ def shoot(E, L=30):
 
     return psi[len(psi) - 1]   
 
+def plot_states(roots, dx=0.0001, pad=3, outdir="plots"):
+    os.makedirs(outdir, exist_ok=True)
+
+    for E in roots:
+        out = TISE(dx=dx, e=E).predict(E + pad)
+        x, psi = out[:, 0], out[:, 1]
+
+        psi = psi / np.sqrt(np.sum(psi**2) * dx)     # normalize so int psi^2 dx = 1
+
+        amp = np.max(np.abs(psi[x <= E]))            # amplitude in the allowed region
+
+        fig, ax = plt.subplots(figsize=(7, 3))
+        ax.plot(x, psi)
+        ax.axvline(E, ls=":", color="gray")          # turning point
+        ax.axhline(0, color="k", lw=0.5)
+        ax.set_ylim(-1.5 * amp, 1.5 * amp)           # clip any residual tail growth
+        ax.set_xlabel("x")
+        ax.set_ylabel("psi")
+        ax.set_title(f"E = {E:.6f}")
+        fig.tight_layout()
+
+        fig.savefig(os.path.join(outdir, f"psi_E_{E:.6f}.png"), dpi=150)
+        plt.close(fig)                               # don't keep all the figures open
+
 def main():
     # 1. Coarse scan: evaluate psi(L) on an energy grid
     energies = np.arange(E_min, E_max + dE, dE)
+    print("Made it to here\n")
     psi_L = np.array([shoot(E, L=L)for E in energies])
+    print("Found psi(L) values\n")
 
     # 2. Find intervals where psi(L) changes sign
     brackets = [(energies[i], energies[i + 1])
@@ -44,6 +71,7 @@ def main():
     plt.ylabel("psi(L)")
     plt.yscale("symlog")
     plt.legend()
+    plot_states(roots)
     plt.show()
 
 
