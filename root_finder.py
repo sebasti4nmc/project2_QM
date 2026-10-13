@@ -18,29 +18,66 @@ def shoot(E, L=30):
 
     return psi[len(psi) - 1]   
 
+# def plot_states(roots, dx=0.0001, pad=3, outdir="plots"):
+#     os.makedirs(outdir, exist_ok=True)
+
+#     for E in roots:
+#         out = TISE(dx=dx, e=E).predict(E + pad)
+#         x, psi = out[:, 0], out[:, 1]
+
+#         psi = psi / np.sqrt(np.sum(psi**2) * dx)     # normalize so int psi^2 dx = 1
+
+#         amp = np.max(np.abs(psi[x <= E]))            # amplitude in the allowed region
+
+#         fig, ax = plt.subplots(figsize=(7, 3))
+#         ax.plot(x, psi)
+#         ax.axvline(E, ls=":", color="gray")          # turning point
+#         ax.axhline(0, color="k", lw=0.5)
+#         ax.set_ylim(-1.5 * amp, 1.5 * amp)           # clip any residual tail growth
+#         ax.set_xlabel("x")
+#         ax.set_ylabel("psi")
+#         ax.set_title(f"E = {E:.6f}")
+#         fig.tight_layout()
+
+#         fig.savefig(os.path.join(outdir, f"psi_E_{E:.6f}.png"), dpi=150)
+#         plt.close(fig)                               # don't keep all the figures open
+
+import analytical 
+
 def plot_states(roots, dx=0.0001, pad=3, outdir="plots"):
     os.makedirs(outdir, exist_ok=True)
+    exact_energies = []
 
-    for E in roots:
-        out = TISE(dx=dx, e=E).predict(E + pad)
-        x, psi = out[:, 0], out[:, 1]
+    for n, E in enumerate(roots, start=1):
+        out = np.array(TISE(dx=dx, e=E).predict(E + pad))
+        x, psi_num = out[:, 0], out[:, 1]
 
-        psi = psi / np.sqrt(np.sum(psi**2) * dx)     # normalize so int psi^2 dx = 1
+        E_exact = analytical.eigen_calc(n)
+        exact_energies.append(E_exact)
+        psi_ex = analytical.psi_exact(x, E_exact)
 
-        amp = np.max(np.abs(psi[x <= E]))            # amplitude in the allowed region
+        # normalize both with the exact solution's norm, so any difference
+        # between the curves is real error and not a scale choice
+        N = np.sqrt(np.sum(psi_ex**2) * dx)
+        psi_num, psi_ex = psi_num / N, psi_ex / N
+
+        amp = np.max(np.abs(psi_ex[x <= E_exact]))
 
         fig, ax = plt.subplots(figsize=(7, 3))
-        ax.plot(x, psi)
-        ax.axvline(E, ls=":", color="gray")          # turning point
+        ax.plot(x, psi_ex, label=f"exact (E = {E_exact:.6f})")
+        ax.plot(x, psi_num, "--", label=f"numerical (E = {E:.6f})")
+        ax.axvline(E_exact, ls=":", color="gray")
         ax.axhline(0, color="k", lw=0.5)
-        ax.set_ylim(-1.5 * amp, 1.5 * amp)           # clip any residual tail growth
+        ax.set_ylim(-1.5 * amp, 1.5 * amp)
         ax.set_xlabel("x")
         ax.set_ylabel("psi")
-        ax.set_title(f"E = {E:.6f}")
+        ax.set_title(f"state n = {n}")
+        ax.legend(loc="upper right")
         fig.tight_layout()
+        fig.savefig(os.path.join(outdir, f"psi_n{n}.png"), dpi=150)
+        plt.close(fig)
 
-        fig.savefig(os.path.join(outdir, f"psi_E_{E:.6f}.png"), dpi=150)
-        plt.close(fig)                               # don't keep all the figures open
+    return exact_energies
 
 def main():
     # 1. Coarse scan: evaluate psi(L) on an energy grid
@@ -71,6 +108,7 @@ def main():
     plt.ylabel("psi(L)")
     plt.yscale("symlog")
     plt.legend()
+
     plot_states(roots)
     plt.show()
 
