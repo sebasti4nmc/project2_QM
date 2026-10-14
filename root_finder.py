@@ -16,35 +16,11 @@ def shoot(E, L=30):
     x = np.array([p[0] for p in out])
     psi = np.array([p[1] for p in out])
 
-    return psi[len(psi) - 1]   
-
-# def plot_states(roots, dx=0.0001, pad=3, outdir="plots"):
-#     os.makedirs(outdir, exist_ok=True)
-
-#     for E in roots:
-#         out = TISE(dx=dx, e=E).predict(E + pad)
-#         x, psi = out[:, 0], out[:, 1]
-
-#         psi = psi / np.sqrt(np.sum(psi**2) * dx)     # normalize so int psi^2 dx = 1
-
-#         amp = np.max(np.abs(psi[x <= E]))            # amplitude in the allowed region
-
-#         fig, ax = plt.subplots(figsize=(7, 3))
-#         ax.plot(x, psi)
-#         ax.axvline(E, ls=":", color="gray")          # turning point
-#         ax.axhline(0, color="k", lw=0.5)
-#         ax.set_ylim(-1.5 * amp, 1.5 * amp)           # clip any residual tail growth
-#         ax.set_xlabel("x")
-#         ax.set_ylabel("psi")
-#         ax.set_title(f"E = {E:.6f}")
-#         fig.tight_layout()
-
-#         fig.savefig(os.path.join(outdir, f"psi_E_{E:.6f}.png"), dpi=150)
-#         plt.close(fig)                               # don't keep all the figures open
+    return psi[len(psi) - 1] 
 
 import analytical 
 
-def plot_states(roots, dx=0.0001, pad=3, outdir="plots"):
+def plot_states(roots, dx=.0001, pad=3, outdir="plots"):
     os.makedirs(outdir, exist_ok=True)
     exact_energies = []
 
@@ -110,7 +86,7 @@ def main():
     plt.legend()
 
     plot_states(roots)
-    plt.show()
+    # plt.show()
 
 
 if __name__ == "__main__":
